@@ -17,8 +17,8 @@ import {
 } from "./notificationService.js";
 import { sorobanService } from "./sorobanService.js";
 import { updateUserScoresBulk } from "./scoresService.js";
-import { subscribeToContractEvents } from "./chainListener";
-import db from "../db";
+import { subscribeToContractEvents } from "../services/chainListener.js";
+import db from "../db/connection.js";
 
 interface SorobanRawEvent {
   id: string;
@@ -830,24 +830,4 @@ init() {
       return null;
     }
   }
-  async handleLoanEvent(event: any) {
-  try {
-    await db('loan_events')
-      .insert({
-        transaction_hash: event.txHash,
-        event_index: event.index,
-        borrower: event.borrower,
-        loan_id: event.loanId,
-        event_type: event.type,
-        amount: event.amount,
-        created_at: new Date(event.timestamp),
-      })
-      .onConflict(['transaction_hash', 'event_index'])
-      .ignore(); // Prevent duplicates if re-indexing
-  } catch (err) {
-    console.error(`Failed to insert loan event: ${err.message}`);
-  }
 }
-
-}
-
